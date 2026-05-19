@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>課次七：複習 — 事務紀實文書互動闖關遊戲</title>
+<noscript><style>body::before{content:"請啟用 JavaScript 以運行此遊戲";display:block;text-align:center;padding:40px;font-size:1.2rem;}</style></noscript>
+<style>
+:root{
+  --pri:#1a5c8a;--pri2:#2478b0;--pri3:#0f3d5e;
+  --acc:#d4700a;--acc2:#e8922a;
+  --ok:#229954;--err:#c0392b;
+  --bg:#edf2f7;--card:#fff;--txt:#1a2a38;--muted:#607080;--bdr:#c8d8e8;
+  --shadow:0 4px 22px rgba(26,92,138,.11);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+
+/* ── Header ── */
+header{background:linear-gradient(135deg,var(--pri3) 0%,var(--pri) 55%,var(--pri2) 100%);color:#fff;padding:18px 24px 14px;text-align:center;box-shadow:0 3px 18px rgba(0,0,0,.22);position:relative}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc))}
+header h1{font-size:1.45rem;letter-spacing:.5px;margin-bottom:3px}
+header p{font-size:.82rem;opacity:.78}
+
+/* ── Wrap ── */
+.wrap{max-width:860px;margin:0 auto;padding:26px 16px 70px}
+
+/* ── Home ── */
+#home{display:flex;flex-direction:column;align-items:center;gap:20px}
+.home-intro{background:var(--card);border-radius:16px;padding:20px 24px;box-shadow:var(--shadow);width:100%;max-width:660px;text-align:center}
+.home-intro h2{color:var(--pri);font-size:1.12rem;margin-bottom:7px}
+.home-intro p{color:var(--muted);font-size:.86rem;line-height:1.7}
+.lv-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:660px}
+@media(max-width:480px){.lv-grid{grid-template-columns:1fr}}
+.lv-card{background:var(--card);border:2px solid var(--bdr);border-radius:16px;padding:20px 14px;cursor:pointer;transition:all .2s;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.lv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--pri);opacity:0;transition:opacity .2s}
+.lv-card:hover{border-color:var(--pri2);transform:translateY(-3px);box-shadow:0 10px 30px rgba(26,92,138,.18)}
+.lv-card:hover::before{opacity:1}
+.lv-card:active{transform:translateY(-1px)}
+.lv-icon{font-size:2rem;margin-bottom:7px}
+.lv-num{font-size:.7rem;font-weight:700;color:var(--pri);letter-spacing:1px;margin-bottom:3px}
+.lv-title{font-size:.96rem;font-weight:700;color:var(--txt);margin-bottom:5px;line-height:1.4}
+.lv-desc{font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:9px}
+.lv-badge{display:inline-block;background:var(--pri);color:#fff;border-radius:20px;padding:2px 12px;font-size:.73rem;font-weight:700}
+
+/* ── Timer bar ── */
+#tbar{display:none;background:var(--card);border-radius:12px;padding:10px 16px;box-shadow:var(--shadow);margin-bottom:14px;align-items:center;gap:11px}
+#tbar.on{display:flex}
+#tico{font-size:1.3rem}
+#ttxt{font-size:1rem;font-weight:800;color:var(--pri);min-width:58px}
+#ttxt.urg{color:var(--err);animation:blink .5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.tpw{flex:1;background:#d8e6f0;border-radius:8px;height:8px;overflow:hidden}
+.tpb{height:100%;background:linear-gradient(90deg,var(--ok),#7dcea0);border-radius:8px;transition:width .95s linear,background .3s}
+.tpb.urg{background:linear-gradient(90deg,var(--err),#f1948a)}
+#sco{font-size:.88rem;font-weight:800;color:var(--acc);white-space:nowrap}
+
+/* ── Dots ── */
+.dots{display:flex;gap:5px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:#c8d8e8;transition:background .22s;flex-shrink:0}
+.dot.ok{background:var(--ok)}
+.dot.err{background:var(--err)}
+.dot.cur{background:var(--acc);box-shadow:0 0 0 3px rgba(212,112,10,.22)}
+
+/* ── Question ── */
+#qa{display:none}
+#qa.on{display:block}
+.qh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.qtag{background:var(--pri);color:#fff;border-radius:20px;padding:3px 13px;font-size:.78rem;font-weight:700}
+.qprog{font-size:.8rem;color:var(--muted)}
+.qcard{background:var(--card);border-radius:18px;padding:26px 24px 20px;box-shadow:var(--shadow);margin-bottom:12px}
+.qlbl{font-size:.76rem;color:var(--muted);margin-bottom:7px;font-weight:600;letter-spacing:.5px}
+.qtxt{font-size:1.04rem;font-weight:600;line-height:1.75;margin-bottom:20px;color:var(--txt)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:500px){.opts{grid-template-columns:1fr}}
+.opt{background:#f0f5fb;border:2px solid var(--bdr);border-radius:11px;padding:12px 15px;font-size:.91rem;cursor:pointer;text-align:left;transition:all .17s;color:var(--txt);line-height:1.55;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.opt:hover:not(:disabled){border-color:var(--pri2);background:#ddeef8}
+.opt:active:not(:disabled){transform:scale(.98)}
+.opt.cor{border-color:var(--ok);background:#d4efdf;color:#145a32;font-weight:700}
+.opt.wrg{border-color:var(--err);background:#fde8e8;color:#7b241c}
+.opt:disabled{cursor:default}
+.fb{border-radius:10px;padding:11px 15px;margin-top:11px;font-size:.88rem;font-weight:600;display:none;line-height:1.55}
+.fb.on{display:block}
+.fb.ok{background:#d4efdf;color:#145a32;border:1.5px solid var(--ok)}
+.fb.err{background:#fde8e8;color:#7b241c;border:1.5px solid var(--err)}
+.exp{background:#fef9ec;border:1.5px solid #f0c040;border-radius:10px;padding:10px 14px;margin-top:9px;font-size:.83rem;color:#7a5a08;line-height:1.6;display:none}
+.exp.on{display:block}
+.nav{display:flex;gap:9px;justify-content:flex-end;margin-top:5px}
+.btn{padding:9px 22px;border-radius:10px;border:none;font-size:.91rem;font-weight:700;cursor:pointer;transition:all .17s;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.btn-p{background:var(--pri);color:#fff}
+.btn-p:hover{background:var(--pri2)}
+.btn-p:disabled{background:#aaa;cursor:default}
+.btn-s{background:#d8e6f0;color:var(--txt)}
+.btn-s:hover{background:#c0d4e4}
+.btn-s:disabled{opacity:.5;cursor:default}
+
+/* ── Result ── */
+#res{display:none;text-align:center}
+#res.on{display:block}
+.rcard{background:var(--card);border-radius:22px;padding:36px 26px;box-shadow:var(--shadow);max-width:520px;margin:0 auto}
+.re{font-size:3.8rem;margin-bottom:9px}
+.rt{font-size:1.4rem;font-weight:800;color:var(--pri);margin-bottom:5px}
+.rs{font-size:1.8rem;letter-spacing:5px;margin-bottom:9px}
+.rsc{font-size:2.8rem;font-weight:900;color:var(--acc);margin:7px 0}
+.rd{color:var(--muted);font-size:.88rem;margin-bottom:20px}
+.rbd{display:flex;gap:7px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.rchip{background:#f0f5fb;border-radius:8px;padding:5px 12px;font-size:.8rem;color:var(--muted)}
+.rchip.ok{background:#d4efdf;color:#145a32}
+.rchip.err{background:#fde8e8;color:#7b241c}
+.srow{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:5px}
+.sbtn{padding:10px 20px;border-radius:10px;border:none;font-size:.86rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .17s;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.sc{background:var(--pri);color:#fff}
+.sc:hover{background:var(--pri2)}
+.sr{background:var(--acc);color:#fff}
+.sr:hover{background:var(--acc2)}
+.sh{background:#d8e6f0;color:var(--txt)}
+.sh:hover{background:#c0d4e4}
+
+/* ── Overlay ── */
+#ov{position:fixed;inset:0;background:rgba(8,22,40,.72);display:none;align-items:center;justify-content:center;z-index:200}
+#ov.on{display:flex}
+.ibox{background:#fff;border-radius:22px;padding:34px 28px;max-width:460px;width:92%;text-align:center;box-shadow:0 12px 50px rgba(0,0,0,.28)}
+.ibox h2{font-size:1.3rem;color:var(--pri);margin-bottom:9px}
+.ibox p{font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.topts{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.topt{padding:8px 16px;border-radius:9px;border:2px solid var(--bdr);cursor:pointer;font-size:.86rem;font-weight:700;transition:all .17s;background:#f0f5fb;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.topt.sel{border-color:var(--pri);background:#d6eaf8;color:var(--pri)}
+.istart{width:100%;padding:13px;border-radius:11px;border:none;background:var(--pri);color:#fff;font-size:.98rem;font-weight:800;cursor:pointer;transition:background .17s;font-family:inherit}
+.istart:hover{background:var(--pri2)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#1a2a38;color:#fff;padding:9px 24px;border-radius:28px;font-size:.86rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 課次七：複習 — 事務紀實文書</h1>
+  <p>LAN3008 GCCH313A — 互動闖關遊戲（四關 · 37題）</p>
+</header>
+
+<div class="wrap">
+  <!-- Home -->
+  <div id="home">
+    <div class="home-intro">
+      <h2>🎯 四關挑戰，全面鞏固事務紀實文書知識！</h2>
+      <p>本遊戲涵蓋課次七四大活動：信函基礎知識、投訴信寫作重點、回覆投訴信寫作重點，以及澳美航空情景分析，每關 9–10 題，支援計時闖關模式。</p>
+    </div>
+    <div class="lv-grid" id="lv-grid">
+      <div class="lv-card" data-lv="0">
+        <div class="lv-icon">🔥</div>
+        <div class="lv-num">關卡一</div>
+        <div class="lv-title">熱身活動<br>信函基礎知識</div>
+        <div class="lv-desc">格式、類別、常用語複習</div>
+        <span class="lv-badge">9 題</span>
+      </div>
+      <div class="lv-card" data-lv="1">
+        <div class="lv-icon">📮</div>
+        <div class="lv-num">關卡二</div>
+        <div class="lv-title">投訴信<br>寫作重點</div>
+        <div class="lv-desc">歸納投訴重點、問題所在、提出要求</div>
+        <span class="lv-badge">9 題</span>
+      </div>
+      <div class="lv-card" data-lv="2">
+        <div class="lv-icon">📬</div>
+        <div class="lv-num">關卡三</div>
+        <div class="lv-title">回覆投訴信<br>寫作重點</div>
+        <div class="lv-desc">解釋原因、提出跟進改善措施</div>
+        <span class="lv-badge">9 題</span>
+      </div>
+      <div class="lv-card" data-lv="3">
+        <div class="lv-icon">✈️</div>
+        <div class="lv-num">關卡四</div>
+        <div class="lv-title">說一說<br>澳美航空情景</div>
+        <div class="lv-desc">根據資料分析投訴及回覆</div>
+        <span class="lv-badge">10 題</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timer bar -->
+  <div id="tbar">
+    <span id="tico">⏱️</span>
+    <span id="ttxt">--</span>
+    <div class="tpw"><div class="tpb" id="tpb"></div></div>
+    <span id="sco">得分：0</span>
+  </div>
+
+  <!-- Dots -->
+  <div class="dots" id="dots"></div>
+
+  <!-- Question -->
+  <div id="qa">
+    <div class="qh">
+      <span class="qtag" id="qtag">關卡一</span>
+      <span class="qprog" id="qprog">第 1 / 9 題</span>
+    </div>
+    <div class="qcard">
+      <div class="qlbl" id="qlbl">第 1 題</div>
+      <div class="qtxt" id="qtxt"></div>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <div class="exp" id="exp"></div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-s" id="btn-skip">跳過</button>
+      <button class="btn btn-p" id="btn-next" disabled>下一題 →</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="res">
+    <div class="rcard">
+      <div class="re" id="re">🎉</div>
+      <div class="rt" id="rt">完成關卡！</div>
+      <div class="rs" id="rs">⭐⭐⭐</div>
+      <div class="rsc" id="rsc">0 / 0</div>
+      <div class="rd" id="rd"></div>
+      <div class="rbd" id="rbd"></div>
+      <div class="srow">
+        <button class="sbtn sc" id="btn-share">🔗 複製分享連結</button>
+        <button class="sbtn sr" id="btn-retry">🔄 再試一次</button>
+        <button class="sbtn sh" id="btn-home">🏠 返回主頁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div id="ov">
+  <div class="ibox">
+    <h2>⏱️ 選擇計時模式</h2>
+    <p>選擇每題的作答時限，或選擇「無限時」自由作答。<br>計時模式增加挑戰性，快速答對可獲速度加分！</p>
+    <div class="topts" id="topts">
+      <button class="topt sel" data-sec="0">無限時</button>
+      <button class="topt" data-sec="20">每題 20 秒</button>
+      <button class="topt" data-sec="30">每題 30 秒</button>
+      <button class="topt" data-sec="60">每題 60 秒</button>
+    </div>
+    <button class="istart" id="btn-istart">🚀 開始闖關！</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ 連結已複製到剪貼板！</div>
+
+<script>
+var LEVELS = [
+  {
+    name: "關卡一：熱身活動——信函基礎知識",
+    tag: "關卡一",
+    qs: [
+      { q: "本單元所學的三種事務紀實文書信函類別是？",
+        opts: ["投訴信、建議書、查詢信","投訴信、回覆投訴信、回覆查詢信","開會通知、會議紀錄、備忘錄","查詢信、回覆查詢信、建議書"],
+        ans: 1, exp: "本單元主要學習投訴信、回覆投訴信、回覆查詢信三種事務紀實文書信函。" },
+      { q: "私人書信與事務紀實文書信函在「結構」上有什麼分別？",
+        opts: ["私人書信較嚴謹，事務信函較隨意","兩者結構相同","私人書信較隨意，事務信函較嚴謹","事務信函沒有固定結構"],
+        ans: 2, exp: "私人書信結構較隨意，事務紀實文書信函結構較嚴謹，有特定格式要求。" },
+      { q: "事務紀實文書信函的「信頭」部分一般包括哪些資料？",
+        opts: ["收信人姓名、地址、電話","機構名稱、標誌、聯絡資料（電話、傳真、網址）","發信人姓名、職銜、部門","日期、標題、正文"],
+        ans: 1, exp: "信頭一般包括機構名稱、標誌、聯絡資料（電話號碼、傳真號碼、網址（若有））。" },
+      { q: "一般而言，投訴信應在多長時間內回覆較為適宜？",
+        opts: ["三天內","兩週內","約一個星期內","一個月內"],
+        ans: 2, exp: "視乎事件性質，投訴信約一個星期內回覆，回覆投訴信和回覆查詢信應越快越好。" },
+      { q: "在事務紀實文書信函中寫上標題，有什麼主要作用？",
+        opts: ["使信件看起來更正式","一針見血說明來意，讓收信人感到方便清晰","符合格式規定","方便存檔"],
+        ans: 1, exp: "合適的標題能一針見血、開門見山說明來意，看的人感到方便、清晰，是體貼的做法。" },
+      { q: "以下哪個是事務紀實文書信函常用的祝頌語？",
+        opts: ["萬事如意","身體健康","商祺","心想事成"],
+        ans: 2, exp: "事務紀實文書信函常用的祝頌語包括台安、時祺、商祺等，「身體健康」和「萬事如意」是私人書信用語。" },
+      { q: "在事務紀實文書信函中，發文者姓名之前要寫上什麼？",
+        opts: ["只需寫姓名即可","機構名稱、部門名稱、職銜、發文者簽名","日期和地址","收信人姓名"],
+        ans: 1, exp: "發文者姓名之前要寫上機構名稱、部門名稱、職銜，並附上發文者簽名。" },
+      { q: "寫事務紀實文書信函時，如無法得知收信人的職銜和姓名，在受文人位置可以寫什麼？",
+        opts: ["「負責人」","「閣下」","「執事先生」","「相關人員」"],
+        ans: 2, exp: "如無法得知收信人的職銜和姓名，可在受文人的位置寫上「執事先生」，意思是「負責人」。" },
+      { q: "私人書信與事務紀實文書信函在「內容」上有什麼分別？",
+        opts: ["私人書信內容為私人間日常往來，事務信函為處理事務而發出","兩者內容相同","私人書信內容較正式","事務信函可以包含私人感情"],
+        ans: 0, exp: "私人書信內容為私人間日常往來，事務紀實文書信函則是為處理事務而發出，內容以業務公事為主。" }
+    ]
+  },
+  {
+    name: "關卡二：投訴信寫作重點",
+    tag: "關卡二",
+    qs: [
+      { q: "買回來的衣物質量很差、洗的時候脫色，投訴重點應歸納為？",
+        opts: ["送貨遲誤","貨不對辦","貨品質素欠佳／差劣","投訴無門"],
+        ans: 2, exp: "衣物質量差、脫色，問題在於貨品質素欠佳，投訴重點應歸納為「貨品質素欠佳／差劣」。" },
+      { q: "早前致電餐廳預先訂座，但當日職員堅持要在門外排隊，等了半小時才能入座，問題所在是？",
+        opts: ["送貨遲誤","訂位制度形同虛設、管理混亂、服務員態度欠佳","沒有核對貨品清單","罔顧顧客利益"],
+        ans: 1, exp: "訂座後仍要排隊，說明訂位制度形同虛設；等候半小時反映管理混亂；職員態度強硬則是服務員態度欠佳。" },
+      { q: "上網訂購貨品，過了指定送貨時間還沒有送到，投訴重點是？",
+        opts: ["貨不對辦","貨品質素欠佳","送貨遲誤","投訴無門"],
+        ans: 2, exp: "過了指定送貨時間仍未送到，投訴重點是「送貨遲誤」，問題所在是沒有實踐服務承諾。" },
+      { q: "訂了3瓶沐浴露只送來1瓶，訂了花生油卻送來芥花籽油，投訴重點是？",
+        opts: ["送貨遲誤","貨品質素欠佳","投訴無門","貨不對辦"],
+        ans: 3, exp: "送來的貨品與訂購的不符，投訴重點是「貨不對辦」，問題在於沒有核對貨品清單及疏忽管理。" },
+      { q: "多次致電和去信希望對方作出賠償，但等了很久還沒有回音，投訴重點是？",
+        opts: ["貨品質素欠佳","投訴無門／推卸責任","送貨遲誤","管理不善"],
+        ans: 1, exp: "多次聯絡仍無回音，說明對方「投訴無門／推卸責任」，問題在於罔顧顧客利益、不負責任。" },
+      { q: "針對「貨品質素欠佳」的投訴，應提出什麼合理要求？",
+        opts: ["道歉及提升管理制度","更換貨品／賠償款項，並提升品質監控機制","改善服務質素","徹查事件及儘快回覆"],
+        ans: 1, exp: "針對貨品質素問題，合理要求包括：更換貨品／賠償款項，以及要求商家提升品質監控機制。" },
+      { q: "針對「送貨遲誤」的投訴，應提出什麼合理要求？",
+        opts: ["更換貨品","道歉及改善服務質素","徹查事件及賠償","提升品質監控"],
+        ans: 1, exp: "送貨遲誤的合理要求是：改善服務質素及道歉，因為問題在於沒有實踐服務承諾。" },
+      { q: "投訴信的正文引言部分應包含什麼？",
+        opts: ["直接列出所有投訴內容","說明致函目的，重提事件背景","提出賠償要求","介紹自己的身份"],
+        ans: 1, exp: "投訴信引言部分應說明致函目的，重提事件背景，讓收信人清楚了解來信原因。" },
+      { q: "投訴信的結尾語應包含什麼？",
+        opts: ["重複所有投訴內容","提出具體要求，並提供聯絡方法，要求對方儘快回覆","介紹公司背景","感謝對方的服務"],
+        ans: 1, exp: "投訴信結尾語應提出具體要求，提供聯絡方法，並要求對方儘快回覆，表達維權的決心。" }
+    ]
+  },
+  {
+    name: "關卡三：回覆投訴信寫作重點",
+    tag: "關卡三",
+    qs: [
+      { q: "顧客投訴買回來的電飯鍋只用了三天便壞了，回覆時應如何解釋原因？",
+        opts: ["直接承認產品有問題","強調公司有品質監控機制，屬個別事件；可能與水的份量有關","拒絕承認任何責任","要求顧客提供更多證明"],
+        ans: 1, exp: "回覆時應強調公司有品質監控機制，說明屬個別事件，同時提出可能與水的份量有關，態度誠懇。" },
+      { q: "顧客投訴電飯鍋損壞，回覆時應提出什麼跟進措施？",
+        opts: ["退款並道歉","可按公司7天購物保證更換貨品，並提醒顧客正確使用方法","要求顧客自行維修","提供折扣優惠"],
+        ans: 1, exp: "可按公司7天購物保證更換貨品，同時售貨員日後會提醒顧客正確使用電器的方法。" },
+      { q: "顧客投訴訂了3瓶沐浴露只送來1瓶，回覆時如何解釋原因？",
+        opts: ["直接道歉，不作解釋","強調公司一向小心核對，因聖誕節訂單多，臨時工對送貨程序不熟悉","否認送貨有誤","要求顧客重新下單"],
+        ans: 1, exp: "解釋原因：公司一向小心核對送貨單；因聖誕節訂單特別多，聘請臨時送貨員；臨時工對送貨程序不熟悉，以致貨不對辦。" },
+      { q: "顧客投訴母親節訂座後仍要在門外排隊，回覆時如何解釋原因？",
+        opts: ["否認有訂座記錄","由於母親節預訂人數特別多，用餐時間比平時長，難以預計入座時間；員工承認態度不夠禮貌","要求顧客下次提早訂座","說明餐廳已停止訂座服務"],
+        ans: 1, exp: "解釋：母親節預訂人數特別多，用餐時間比平時長，難以預計入座時間；員工承認自己態度不夠禮貌。" },
+      { q: "顧客投訴買米未獲贈品，回覆時如何解釋原因？",
+        opts: ["否認有此優惠活動","廣告清楚表明送完即止，顧客到達時贈品已於下午三時送完，門外已貼出告示","要求顧客保留購物收據","說明優惠已取消"],
+        ans: 1, exp: "廣告清楚表明此項優惠送完即止；顧客晚上七時到達，贈品於下午三時已送完；本店已在門外貼出告示。" },
+      { q: "回覆投訴信時，針對「貨不對辦」問題，應提出什麼改善措施？",
+        opts: ["只道歉，不作改善","加強員工培訓、優化服務質素、更換送錯的貨品","要求顧客接受現有服務","提供折扣優惠代替更換"],
+        ans: 1, exp: "針對貨不對辦，改善措施包括：加強員工培訓、優化服務質素，並立即更換送錯的貨品。" },
+      { q: "回覆投訴信的正文中，解釋原因後應做什麼？",
+        opts: ["重複投訴內容","提出跟進或改善措施，表示誠意","要求顧客撤回投訴","介紹公司其他產品"],
+        ans: 1, exp: "回覆投訴信在解釋原因後，必須提出跟進或改善措施，以表示公司的誠意和負責任的態度。" },
+      { q: "回覆投訴信的語氣應如何？",
+        opts: ["強硬，表明公司沒有責任","誠懇、有禮，承認不足並表示改善決心","冷淡，只提供基本資料","過分道歉，承擔所有責任"],
+        ans: 1, exp: "回覆投訴信應態度誠懇、用語有禮，適當承認不足，並表示改善決心，以維護良好的客戶關係。" },
+      { q: "回覆投訴信的結尾語應包含什麼？",
+        opts: ["再次列出所有投訴問題","感謝顧客提出寶貴意見，提供聯絡方法，表示期望繼續服務","要求顧客不再投訴","介紹公司其他優惠"],
+        ans: 1, exp: "結尾語應感謝顧客提出寶貴意見，提供聯絡方法，並表示期望繼續為顧客服務，展現誠意。" }
+    ]
+  },
+  {
+    name: "關卡四：說一說——澳美航空情景分析",
+    tag: "關卡四",
+    qs: [
+      { q: "張華乘坐澳美航空AM318航班，原定起飛時間是？",
+        opts: ["上午9時05分","上午11時05分","下午1時05分","晚上7時25分"],
+        ans: 1, exp: "根據機票資料，AM318航班原定於2025年5月19日上午11時05分由香港飛往北京。" },
+      { q: "張華的航班最終於何時到達北京？",
+        opts: ["上午11時35分","下午3時25分","晚上7時25分","晚上9時05分"],
+        ans: 2, exp: "根據張華的面書帖文，他於晚上7:25到達北京，比原定時間足足晚了約8小時。" },
+      { q: "北京首都機場發出緊急通告，暫停所有飛機升降的原因是？",
+        opts: ["颱風影響","跑道維修","霧霾影響，能見度不足300米","航空管制"],
+        ans: 2, exp: "根據資料四，2025年5月19日上午5時10分，北京受霧霾影響，能見度不足300米，故暫停所有飛機升降。" },
+      { q: "北京首都機場的霧霾警告於何時解除？",
+        opts: ["上午8時","上午11時35分","下午1時","晚上6時"],
+        ans: 1, exp: "根據資料四緊急通告（二），霧霾警告於2025年5月19日上午11時35分解除。" },
+      { q: "根據澳美航空處理航班延誤的工作指引，延誤3小時應派發多少美食券？",
+        opts: ["$50乙張","$20三張","$20乙張","$100乙張"],
+        ans: 2, exp: "根據資料三工作指引，延誤3小時派發$20美食券乙張；延誤6小時才派發$20三張。" },
+      { q: "張華投訴空中服務員要求他付費用餐，根據機票條款，以下哪項說法正確？",
+        opts: ["航空公司必須為所有乘客提供免費飛機餐","張華購買的特惠機票不包括機上餐飲膳食","空中服務員做法不符合公司規定","所有乘客均可免費享用正餐"],
+        ans: 1, exp: "根據資料一機票條款及細則，特惠票價不包括機上餐飲膳食，因此空中服務員要求付費是正確的。" },
+      { q: "根據澳美航空天廚美食餐單，正餐（含餐包、前菜、主食、甜品）的價格是？",
+        opts: ["HKD$50","HKD$100","HKD$40","HKD$160"],
+        ans: 3, exp: "根據資料二天廚美食餐單，正餐（含餐包、前菜、主食、甜品）費用為HKD$160。" },
+      { q: "回覆張華投訴信的人是誰？其職銜是什麼？",
+        opts: ["江一心，客戶服務主任","陳航，客戶服務經理","江一心，客戶服務經理","陳航，客戶服務主任"],
+        ans: 1, exp: "根據參考答案，回覆投訴信由陳航（客戶服務經理）署名謹覆，而非江一心（客戶服務主任）。" },
+      { q: "澳美航空在回覆投訴信中，針對地勤人員未能提供足夠資訊的問題，提出了什麼改善措施？",
+        opts: ["解僱相關地勤人員","加強與各地機場的聯繫，向職員和旅客適時發放資訊","增加地勤人員數目","取消航班延誤補償"],
+        ans: 1, exp: "回覆信中提出：公司會進一步加強與各地機場的聯繫，向職員和旅客適時發放資訊，以回應乘客的需要。" },
+      { q: "澳美航空回覆投訴信中，針對空中服務員態度問題，提出了什麼處理措施？",
+        opts: ["立即解僱該服務員","已向該服務員發出口頭警告，訓誡其必須有禮貌地為乘客說明有關安排","要求服務員向張華道歉","調派該服務員至其他崗位"],
+        ans: 1, exp: "回覆信中提到：已向該名服務員發出口頭警告，訓誡其必須有禮貌地為乘客說明有關安排。" }
+    ]
+  }
+];
+
+// ── State ──────────────────────────────────────────────
+var curLv=0,curQ=0,score=0,answered=false;
+var results=[],timePerQ=0,qTimer=null,qLeft=0;
+var totalSec=0,lvTimer=null,pendLv=0;
+
+// ── Init ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Level cards
+  var cards = document.querySelectorAll('.lv-card');
+  for (var i=0; i<cards.length; i++) {
+    (function(c){ c.addEventListener('click', function(){ openOv(parseInt(c.getAttribute('data-lv'))); }); })(cards[i]);
+  }
+  // Time opts
+  var topts = document.querySelectorAll('.topt');
+  for (var j=0; j<topts.length; j++) {
+    (function(t){ t.addEventListener('click', function(){
+      document.querySelectorAll('.topt').forEach(function(x){ x.classList.remove('sel'); });
+      t.classList.add('sel');
+    }); })(topts[j]);
+  }
+  document.getElementById('btn-istart').addEventListener('click', confirmStart);
+  document.getElementById('btn-skip').addEventListener('click', skipQ);
+  document.getElementById('btn-next').addEventListener('click', nextQ);
+  document.getElementById('btn-share').addEventListener('click', copyLink);
+  document.getElementById('btn-retry').addEventListener('click', retryLv);
+  document.getElementById('btn-home').addEventListener('click', goHome);
+  // URL param
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var lv = parseInt(p.get('lv'));
+    if (!isNaN(lv) && lv>=0 && lv<LEVELS.length) { pendLv=lv; document.getElementById('ov').classList.add('on'); }
+  } catch(e){}
+  document.getElementById('home').style.display = 'flex';
+});
+
+// ── Overlay ────────────────────────────────────────────
+function openOv(lv){ pendLv=lv; document.getElementById('ov').classList.add('on'); }
+function confirmStart(){
+  var sel=document.querySelector('.topt.sel');
+  timePerQ=sel?parseInt(sel.getAttribute('data-sec')):0;
+  document.getElementById('ov').classList.remove('on');
+  startLv(pendLv);
+}
+
+// ── Level ──────────────────────────────────────────────
+function startLv(lv){
+  curLv=lv; curQ=0; score=0; answered=false; results=[]; totalSec=0;
+  document.getElementById('home').style.display='none';
+  document.getElementById('res').classList.remove('on');
+  document.getElementById('qa').classList.add('on');
+  clearInterval(lvTimer);
+  lvTimer=setInterval(function(){ totalSec++; },1000);
+  buildDots(); renderQ();
+}
+
+// ── Dots ───────────────────────────────────────────────
+function buildDots(){
+  var row=document.getElementById('dots'); row.innerHTML='';
+  var qs=LEVELS[curLv].qs;
+  for(var i=0;i<qs.length;i++){
+    var d=document.createElement('div');
+    d.className='dot'+(i===0?' cur':''); d.id='dot'+i; row.appendChild(d);
+  }
+}
+function setDot(i,ok){
+  var d=document.getElementById('dot'+i);
+  if(d){ d.className='dot '+(ok?'ok':'err'); }
+  var n=document.getElementById('dot'+(i+1));
+  if(n){ n.classList.add('cur'); }
+}
+
+// ── Render Q ───────────────────────────────────────────
+function renderQ(){
+  var lv=LEVELS[curLv], q=lv.qs[curQ]; answered=false;
+  document.getElementById('qtag').textContent=lv.tag;
+  document.getElementById('qprog').textContent='第 '+(curQ+1)+' / '+lv.qs.length+' 題';
+  document.getElementById('qlbl').textContent='第 '+(curQ+1)+' 題';
+  document.getElementById('qtxt').textContent=q.q;
+  var grid=document.getElementById('opts'); grid.innerHTML='';
+  var labels=['A','B','C','D'];
+  for(var i=0;i<q.opts.length;i++){
+    var b=document.createElement('button');
+    b.className='opt'; b.textContent=labels[i]+'. '+q.opts[i];
+    b.addEventListener('click',(function(idx){ return function(){ pickAns(idx); }; })(i));
+    grid.appendChild(b);
+  }
+  document.getElementById('fb').className='fb';
+  document.getElementById('fb').textContent='';
+  document.getElementById('exp').className='exp';
+  document.getElementById('exp').textContent='';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-skip').disabled=false;
+  startQTimer(); updSco();
+}
+
+// ── Timer ──────────────────────────────────────────────
+function startQTimer(){
+  clearInterval(qTimer);
+  var bar=document.getElementById('tbar');
+  if(timePerQ===0){ bar.classList.remove('on'); return; }
+  qLeft=timePerQ; bar.classList.add('on'); updTimer();
+  qTimer=setInterval(function(){ qLeft--; updTimer(); if(qLeft<=0){ clearInterval(qTimer); if(!answered) timeUp(); } },1000);
+}
+function updTimer(){
+  var txt=document.getElementById('ttxt'), fill=document.getElementById('tpb');
+  var pct=Math.max(0,(qLeft/timePerQ)*100);
+  txt.textContent=qLeft+' 秒'; fill.style.width=pct+'%';
+  var urg=qLeft<=8;
+  if(urg){ txt.classList.add('urg'); fill.classList.add('urg'); }
+  else{ txt.classList.remove('urg'); fill.classList.remove('urg'); }
+}
+function updSco(){ document.getElementById('sco').textContent='得分：'+score; }
+function timeUp(){
+  answered=true;
+  var q=LEVELS[curLv].qs[curQ];
+  var btns=document.querySelectorAll('.opt');
+  for(var i=0;i<btns.length;i++){ btns[i].disabled=true; if(i===q.ans) btns[i].classList.add('cor'); }
+  showFb(false,'⏰ 時間到！正確答案是：'+['A','B','C','D'][q.ans]+'. '+q.opts[q.ans]);
+  showExp(q.exp); results.push(false); setDot(curQ,false);
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true; updSco();
+}
+
+// ── Answer ─────────────────────────────────────────────
+function pickAns(idx){
+  if(answered) return; answered=true; clearInterval(qTimer);
+  var q=LEVELS[curLv].qs[curQ], ok=(idx===q.ans);
+  var btns=document.querySelectorAll('.opt');
+  for(var i=0;i<btns.length;i++){ btns[i].disabled=true; if(i===q.ans) btns[i].classList.add('cor'); }
+  btns[idx].classList.add(ok?'cor':'wrg');
+  if(ok) score++;
+  showFb(ok,ok?'✅ 答對了！':'❌ 答錯了！正確答案是：'+['A','B','C','D'][q.ans]+'. '+q.opts[q.ans]);
+  showExp(q.exp); results.push(ok); setDot(curQ,ok);
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true; updSco();
+}
+function showFb(ok,msg){
+  var fb=document.getElementById('fb');
+  fb.className='fb on '+(ok?'ok':'err'); fb.textContent=msg;
+}
+function showExp(exp){
+  if(!exp) return;
+  var eb=document.getElementById('exp');
+  eb.className='exp on'; eb.textContent='💡 '+exp;
+}
+function skipQ(){
+  if(answered) return; clearInterval(qTimer); answered=true;
+  var q=LEVELS[curLv].qs[curQ];
+  var btns=document.querySelectorAll('.opt');
+  for(var i=0;i<btns.length;i++){ btns[i].disabled=true; if(i===q.ans) btns[i].classList.add('cor'); }
+  showFb(false,'⏭️ 已跳過。正確答案是：'+['A','B','C','D'][q.ans]+'. '+q.opts[q.ans]);
+  showExp(q.exp); results.push(false); setDot(curQ,false);
+  document.getElementById('btn-next').disabled=false;
+  document.getElementById('btn-skip').disabled=true;
+}
+function nextQ(){ curQ++; if(curQ>=LEVELS[curLv].qs.length) showRes(); else renderQ(); }
+
+// ── Result ─────────────────────────────────────────────
+function showRes(){
+  clearInterval(qTimer); clearInterval(lvTimer);
+  document.getElementById('qa').classList.remove('on');
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('tbar').classList.remove('on');
+  document.getElementById('res').classList.add('on');
+  var total=LEVELS[curLv].qs.length, pct=score/total;
+  var mm=String(Math.floor(totalSec/60)).padStart(2,'0');
+  var ss=String(totalSec%60).padStart(2,'0');
+  var emoji,title,stars;
+  if(pct>=0.9){ emoji='🏆'; title='完美通關！太厲害了！'; stars='⭐⭐⭐'; }
+  else if(pct>=0.7){ emoji='🎉'; title='優秀！繼續加油！'; stars='⭐⭐'; }
+  else if(pct>=0.5){ emoji='👍'; title='不錯，再接再厲！'; stars='⭐'; }
+  else{ emoji='📖'; title='需要多加練習！'; stars='☆☆☆'; }
+  document.getElementById('re').textContent=emoji;
+  document.getElementById('rt').textContent=title;
+  document.getElementById('rs').textContent=stars;
+  document.getElementById('rsc').textContent=score+' / '+total;
+  document.getElementById('rd').textContent='答對 '+score+' 題，答錯 '+(total-score)+' 題｜用時 '+mm+':'+ss;
+  var bd=document.getElementById('rbd'); bd.innerHTML='';
+  for(var i=0;i<results.length;i++){
+    var c=document.createElement('div');
+    c.className='rchip '+(results[i]?'ok':'err');
+    c.textContent='Q'+(i+1)+' '+(results[i]?'✓':'✗');
+    bd.appendChild(c);
+  }
+}
+
+// ── Share / Nav ────────────────────────────────────────
+function copyLink(){
+  var base=window.location.href.split('?')[0];
+  var url=base+'?lv='+curLv;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){ showToast(); }).catch(function(){ fallbackCopy(url); });
+  } else { fallbackCopy(url); }
+}
+function fallbackCopy(url){
+  var ta=document.createElement('textarea');
+  ta.value=url; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); showToast(); } catch(e){ prompt('複製以下連結：',url); }
+  document.body.removeChild(ta);
+}
+function showToast(){
+  var t=document.getElementById('toast'); t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); },2400);
+}
+function retryLv(){ document.getElementById('res').classList.remove('on'); openOv(curLv); }
+function goHome(){
+  clearInterval(qTimer); clearInterval(lvTimer);
+  document.getElementById('res').classList.remove('on');
+  document.getElementById('qa').classList.remove('on');
+  document.getElementById('tbar').classList.remove('on');
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('home').style.display='flex';
+}
+</script>
+</body>
+</html>
